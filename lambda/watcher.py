@@ -1,3 +1,8 @@
+import json
+
 def handler(event, context):
-    print("WATCHER EVENT:", event)
-    return {"ok": True}
+    return {
+        "statusCode": 200,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"ok": True})
+    }
