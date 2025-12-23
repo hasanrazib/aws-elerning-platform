@@ -10,6 +10,7 @@ from aws_cdk import (
     aws_sns as sns,
     aws_sqs as sqs,
     aws_sns_subscriptions as subs,
+    aws_cognito as cognito,
 )
 from constructs import Construct
 
@@ -110,3 +111,30 @@ class InfraStack(Stack):
             "POST",
             apigw.LambdaIntegration(generator_fn),
         )
+
+                # --------------------
+        # Cognito (6.5)
+        # --------------------
+        user_pool = cognito.UserPool(
+            self,
+            "UserPool",
+            user_pool_name="aic-user-pool",
+            self_sign_up_enabled=True,
+            sign_in_aliases=cognito.SignInAliases(email=True),
+            auto_verify=cognito.AutoVerifiedAttrs(email=True),
+            password_policy=cognito.PasswordPolicy(
+                min_length=8,
+                require_lowercase=True,
+                require_uppercase=True,
+                require_digits=True,
+                require_symbols=False,
+            ),
+            removal_policy=RemovalPolicy.DESTROY,  # local/dev only
+        )
+
+        user_pool_client = user_pool.add_client(
+            "UserPoolClient",
+            auth_flows=cognito.AuthFlow(user_password=True),
+            generate_secret=False,
+        )
+
